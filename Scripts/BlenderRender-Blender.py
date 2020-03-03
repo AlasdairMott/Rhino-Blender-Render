@@ -113,6 +113,8 @@ def RenderSettings():
     bpy.context.scene.cycles.transmission_bounces           = float(d_settings["settings"]["render_bouncesTransmission"])
     bpy.context.scene.cycles.volume_bounces                 = float(d_settings["settings"]["render_bouncesVolume"])
     bpy.context.scene.view_layers[0].cycles.use_denoising   = bool(d_settings["settings"]["render_Denoising"])
+    if d_settings["settings"]["render_bouncesVolume"] == "EEVEE"
+        bpy.context.scene.render.engine = 'BLENDER_EEVEE'
 
 def RenderScene(r_name):
     bpy.ops.render.render()

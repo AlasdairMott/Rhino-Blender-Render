@@ -14,6 +14,8 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
+bInterface = __import__("BlenderRender-Interface")
+
 class BlenderRender:
 
 	def __init__(self, objects_to_render):
@@ -29,14 +31,14 @@ class BlenderRender:
 		doc_name = rs.DocumentName()
 		if not doc_name: doc_name = "Render_"
 		else: doc_name = os.path.splitext(doc_name)[0]
-		
+
 		self.render_name = doc_name + date.today().strftime("%y%m%d") + "_" + time.strftime("%Hh%Mm%Ss")
 
 		print "Filepath: " + self.filepath
 		print "Rendername: " + self.render_name
 
 		self.camera_data = None
-		
+
 		#Default Material
 		self.materials = []
 		default_material_index = sc.doc.Materials.Add()
@@ -96,32 +98,32 @@ class BlenderRender:
 		for o in objects:
 			obj_ref = Rhino.DocObjects.ObjRef(o)
 			attr = obj_ref.Object().Attributes
-			
+
 			if attr.MaterialSource == Rhino.DocObjects.ObjectMaterialSource.MaterialFromLayer:
 				layer = sc.doc.Layers[attr.LayerIndex]
 				material_index = layer.RenderMaterialIndex
 			else:
 				material_index = attr.MaterialIndex
-			
+
 			if material_index == -1:
 				attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromObject
 				attr.MaterialIndex = self.materials[0]
 				#attr.CommitChanges()
 			elif material_index not in self.materials:
 				self.materials.append(material_index)
-				
+
 			p = o.GetRenderMeshParameters()
 			obrefs = Rhino.DocObjects.RhinoObject.GetRenderMeshes([o], True, True)
 			mainmesh = Rhino.Geometry.Mesh()
 			for obref in obrefs:
 				obm = obref.Mesh()
 				mainmesh.Append(obm)
-			
-			
+
+
 			ml_doc.append(sc.doc.Objects.AddMesh(mainmesh, attr))
 
 		rs.SelectObjects(ml_doc)
-				
+
 		return ml_doc
 
 	def ExportObj(self):
@@ -156,10 +158,11 @@ class BlenderRender:
 			print ("Render Failed")
 
 	def WriteJson(self):
-		json_filename = self.script_path + "BlenderRenderSettings.json"
+		json_filename = self.script_path + "BlenderRender-Camera.json"
 
 		#Clear File
 		with open(json_filename, 'w') as f: json.dump({}, f)
+
 
 		camera = {
                   "camera_width": self.camera_data[0],
@@ -172,22 +175,6 @@ class BlenderRender:
                   "camera_clippingFar" : self.camera_data[7]
                   }
 
-		settings = {
-                  "render_engine": "CYCLES",
-                  "render_scale": 50,
-                  "render_samples": 16,
-                  "render_bouncesTotal": 2,
-                  "render_bouncesDiffuse": 2,
-                  "render_bouncesGlossy": 0,
-                  "render_bouncesTransparency": 0,
-                  "render_bouncesTransmission": 0,
-                  "render_bouncesVolume": 0,
-                  "render_clampingDirect": 0.05,
-                  "render_clampingIndirect": 10,
-                  "render_Denoising": True,
-				  "save": True
-                   }
-
 		world = {
 				"groundplane_enabled" : sc.doc.GroundPlane.Enabled,
 				"groundplane_height" : sc.doc.GroundPlane.Altitude,
@@ -197,24 +184,24 @@ class BlenderRender:
 				"ambientocclusion_factor" : sc.doc.Lights.Skylight.ShadowIntensity
 				}
 
-		new_entry = {"savepath" : self.filepath, "object": self.render_name + ".obj", "camera" : camera, "settings" : settings, "world" : world}
+		new_entry = {"savepath" : self.filepath, "object": self.render_name + ".obj", "camera" : camera, "world" : world}
 
 		with open(json_filename, 'w') as f: json.dump(new_entry, f)
 
 	def ExportMaterials(self):
 		materials_file = open(self.script_path + self.render_name + ".mtl","w+")
-		
+
 		materials_file.write("# Rhino" + "\n")
-		
+
 		for m_index in self.materials:
 			material = sc.doc.Materials[m_index]
-			
+
 			diffuse = [float(material.DiffuseColor.R), float(material.DiffuseColor.G), float(material.DiffuseColor.B)]
 			diffuse = [str('%.4f' % (i/255)) for i in diffuse]
-			
+
 			emmission = [float(material.EmissionColor.R), float(material.EmissionColor.G), float(material.EmissionColor.B)]
 			emmission = [str('%.4f' % (i/255)) for i in emmission]
-			
+
 			materials_file.write("newmtl " + material.Name + "\n")
 			materials_file.write("Ka 0.0000 0.0000 0.0000\n")
 			materials_file.write("Kd " + diffuse[0] + " " + diffuse[1] + " " + diffuse[2] + "\n")
@@ -228,7 +215,7 @@ class BlenderRender:
 			materials_file.write("d 1.0000\n") #Transparency
 			materials_file.write("Ns "+ str('%.4f' % (material.Shine*(900/255))) + "\n")
 			#materials_file.write("Ns 0.5000\n") #Specular amount
-			
+
 		materials_file.close()
 
 class DisplayRenderETO(forms.Dialog[bool]):
@@ -236,28 +223,28 @@ class DisplayRenderETO(forms.Dialog[bool]):
 		self.Title = 'Render Blender'
 		self.Padding = drawing.Padding(5)
 		self.Resizable = True
-		
+
 		self.image = None
 		if os.path.exists(image_path):
 			img = System.Drawing.Image.FromFile(image_path)
-		else: 
+		else:
 			return None
-		
+
 		self.image = forms.ImageView()
 		self.image.Image = Rhino.UI.EtoExtensions.ToEto(img)
 		self.image.Size = drawing.Size(img.Width/2, img.Height/2)
-		
+
 		self.DefaultButton = forms.Button(Text = 'Save')
 		self.DefaultButton.Click += self.OnOKButtonClick
-		
+
 		self.AbortButton = forms.Button(Text = 'Cancel')
 		self.AbortButton.Click += self.OnCloseButtonClick
-		
+
 		layout = forms.DynamicLayout()
 		layout.Spacing = drawing.Size(5, 5)
 		layout.AddRow(self.image)
 		layout.AddSeparateRow(None, self.DefaultButton, self.AbortButton)
- 
+
 		self.Content = layout
 
 	def OnCloseButtonClick(self, sender, e):
@@ -268,21 +255,29 @@ class DisplayRenderETO(forms.Dialog[bool]):
 
 def DisplayRender(path):
 	dialog = DisplayRenderETO(path);
-	if not dialog.image: 
+	if not dialog.image:
 		print "Render Failed"
 		return None
 	result = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
 	if result == False:
 		os.remove(path)
 
-objects_to_render = rs.GetObjects("Choose Objects to Render", preselect=True)
-rs.UnselectAllObjects()
+def run():
+	objects_to_render = rs.GetObjects("Choose Objects to Render", preselect=True)
+	if not objects_to_render: return
+	rs.UnselectAllObjects()
 
-if objects_to_render:
+	settings = bInterface.RequestBlenderRenderSettingsDialog()
+	if settings is None: return
+	
 	render_instance = BlenderRender(objects_to_render)
 	render_instance.GetCameraProperties()
 	render_instance.WriteJson()
 	render_instance.ExportObj()
 	render_instance.ExportMaterials()
-	#render_instance.Render()
-	DisplayRender(render_instance.filepath + render_instance.render_name + '.png')
+	render_instance.Render()
+	
+	if settings:
+		DisplayRender(render_instance.filepath + render_instance.render_name + '.png')
+
+run()

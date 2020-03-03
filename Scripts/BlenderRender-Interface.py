@@ -61,23 +61,6 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 			loc = loc.split(",")
 			self.Location = drawing.Point(int(loc[0]), int(loc[1]))
 		
-
-		self.render_settings = [
-						self.render_engine, self.render_scale, self.render_samples, self.render_bouncesTotal,
-						self.render_bouncesDiffuse, self.render_bouncesGlossy, self.render_bouncesTransparency,
-						self.render_bouncesTransmission, self.render_bouncesVolume, self.render_clampingDirect,
-						self.render_clampingIndirect, self.render_Denoising, self.save
-						]
-		
-		"""
-		render_settings_names = [
-						"render_engine", "render_scale", "samples", "bouncesTotal",
-						"bouncesDiffuse", "bouncesGlossy", "bouncesTransparency",
-						"bouncesTransmission", "bouncesVolume", "clampingDirect",
-						"clampingIndirect", "Denoising", "Save File"
-						]
-		"""
-		
 		self.DefaultButton = forms.Button(Text = 'OK')
 		self.DefaultButton.Click += self.OnOKButtonClick
 
@@ -126,14 +109,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		box_3_layout.AddRow("Save File", self.save)
 		box_3_layout.AddRow("Show Render", self.showRender)
 		
-		"""
-		for i, item in enumerate(self.render_settings):
-			if i < 3: box_1_layout.AddRow(render_settings_names[i], item)
-			elif i < 11: box_2_layout.AddRow(render_settings_names[i], item)
-			else: box_3_layout.AddRow(render_settings_names[i], item)
-		
-		"""
-		
+		#Add the group boxes to the main interface
 		layout.AddRow(box_1)
 		layout.AddRow(box_2)
 		layout.AddRow(box_3)
@@ -152,11 +128,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 
 	"""
 	def GetText(self):
-		return [self.render_engine.DataStore[self.render_settings[0].SelectedIndex],
-				self.render_settings[1].Value, self.render_settings[2].Value, self.render_settings[3].Value,
-				self.render_settings[4].Value, self.render_settings[5].Value, self.render_settings[6].Value,
-				self.render_settings[7].Value, self.render_settings[8].Value, self.render_settings[9].Value,
-				self.render_settings[10].Value, self.render_settings[11].Checked, self.render_settings[12].Checked]
+		return None
 	"""
 	
 	def OnCloseButtonClick(self, sender, e):
@@ -199,7 +171,7 @@ def RequestBlenderRenderSettingsDialog():
 			}
 		
 		new_entry = {"settings" : settings}
-		with open(json_filename, 'w') as f: json.dump(new_entry, f)
+		with open(json_filename, 'w') as f: json.dump(new_entry, f, indent = 4, sort_keys=True)
 		
 		return dialog.showRender.Checked
 

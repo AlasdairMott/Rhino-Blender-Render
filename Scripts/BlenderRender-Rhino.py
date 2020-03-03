@@ -186,7 +186,7 @@ class BlenderRender:
 
 		new_entry = {"savepath" : self.filepath, "object": self.render_name + ".obj", "camera" : camera, "world" : world}
 
-		with open(json_filename, 'w') as f: json.dump(new_entry, f)
+		with open(json_filename, 'w') as f: json.dump(new_entry, f, indent = 4, sort_keys=True)
 
 	def ExportMaterials(self):
 		materials_file = open(self.script_path + self.render_name + ".mtl","w+")
@@ -269,14 +269,14 @@ def run():
 
 	settings = bInterface.RequestBlenderRenderSettingsDialog()
 	if settings is None: return
-	
+
 	render_instance = BlenderRender(objects_to_render)
 	render_instance.GetCameraProperties()
 	render_instance.WriteJson()
 	render_instance.ExportObj()
 	render_instance.ExportMaterials()
 	render_instance.Render()
-	
+
 	if settings:
 		DisplayRender(render_instance.filepath + render_instance.render_name + '.png')
 

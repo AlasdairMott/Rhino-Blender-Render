@@ -7,13 +7,14 @@
         "render_bouncesTransmission": 0.0, 
         "render_bouncesTransparency": 0.0, 
         "render_bouncesVolume": 0.0, 
-        "render_clampingDirect": 0.050000000000000003, 
+        "render_clampingDirect": 0.10000000000000001, 
         "render_clampingIndirect": 10.0, 
-        "render_engine": "EEVEE", 
+        "render_engine": "CYCLES", 
         "render_samples": 64.0, 
         "render_scale": 100.0, 
-        "render_settingWindowPosition": "841,294", 
+        "render_settingWindowPosition": "841,282", 
         "save": false, 
-        "showRender": true
+        "showRender": true, 
+        "world_HDRI": "Colour"
     }
 }

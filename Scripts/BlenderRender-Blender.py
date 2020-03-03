@@ -100,7 +100,18 @@ def SetupScene():
         bpy.ops.mesh.primitive_plane_add()
         plane = bpy.context.selected_objects[0]
         plane.location = (0.0, 0.0, float(d_camera["world"]["groundplane_height"]))
-        plane.scale = (1000000,1000000,1000000)
+        plane.scale = (100000,100000,100000)
+
+    #Sky
+    if d_settings["settings"]["world_HDRI"] != "Colour":
+        hdri_filepath = filepath + "HDRI\\" + d_settings["settings"]["world_HDRI"]
+        scene.world.use_nodes = True
+        world = bpy.data.worlds["World"]
+        nodes = world.node_tree.nodes
+        env_node = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
+        env_node.image = bpy.data.images.load(hdri_filepath)
+        world.node_tree.links.new(env_node.outputs['Color'], world.node_tree.nodes['Background'].inputs['Color'])
+
 
 def RenderSettings():
     bpy.context.scene.render.resolution_percentage          = float(d_settings["settings"]["render_scale"])

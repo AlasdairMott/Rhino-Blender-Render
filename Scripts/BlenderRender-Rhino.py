@@ -34,8 +34,8 @@ class BlenderRender:
 
 		self.render_name = doc_name + date.today().strftime("%y%m%d") + "_" + time.strftime("%Hh%Mm%Ss")
 
-		print "Filepath: " + self.filepath
-		print "Rendername: " + self.render_name
+		#print "Filepath: " + self.filepath
+		#print "Rendername: " + self.render_name
 
 		self.camera_data = None
 
@@ -89,7 +89,6 @@ class BlenderRender:
 		camera_rotation = camera_rotation[1:-1]
 
 		self.camera_data = [width, height, lens_type, lens_length, camera_location.ToString(), camera_rotation, clipping_near, clipping_far]
-		print self.camera_data
 
 	def MeshObjects(self):
 		ml_doc = []
@@ -277,7 +276,7 @@ def run():
 	render_instance.ExportMaterials()
 	render_instance.Render()
 
-	if settings:
+	if settings["showRender"] == True:
 		DisplayRender(render_instance.filepath + render_instance.render_name + '.png')
 
 run()

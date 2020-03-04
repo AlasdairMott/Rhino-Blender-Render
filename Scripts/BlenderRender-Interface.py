@@ -32,8 +32,18 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		self.render_engine.SelectedIndex = 0
 		self.render_scale = forms.NumericUpDown()
 		self.render_samples = forms.NumericStepper()
+		
+		self.camera_exposure = forms.NumericUpDown()
+		self.camera_exposure.DecimalPlaces = 3
+		self.camera_exposure.Increment = 0.1
+		self.camera_exposure.MinValue = -10.000
+		self.camera_exposure.MaxValue = 10.000
+		
 		self.world_HDRI = forms.ComboBox()
 		self.world_HDRI.DataStore = self.HDRIs
+		self.world_HDRIRotation = forms.NumericStepper()
+		self.world_HDRIRotation.DecimalPlaces = 2
+		
 		self.render_bouncesTotal = forms.NumericStepper()
 		self.render_bouncesDiffuse = forms.NumericStepper()
 		self.render_bouncesGlossy = forms.NumericStepper()
@@ -55,7 +65,12 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 			self.render_engine.SelectedIndex 		= self.render_engine.DataStore.index(settings["settings"]["render_engine"])
 			self.render_scale.Value					= float(settings["settings"]["render_scale"])
 			self.render_samples.Value				= int(settings["settings"]["render_samples"])
-			self.world_HDRI.SelectedIndex			= self.world_HDRI.DataStore.index(settings["settings"]["world_HDRI"])
+			
+			self.camera_exposure.Value				= float(settings["camera"]["camera_exposure"])
+			
+			self.world_HDRI.SelectedIndex			= self.world_HDRI.DataStore.index(settings["world"]["world_HDRI"])
+			self.world_HDRIRotation.Value			= float(settings["world"]["world_HDRIRotation"])
+			
 			self.render_bouncesTotal.Value			= int(settings["settings"]["render_bouncesTotal"])
 			self.render_bouncesDiffuse.Value		= int(settings["settings"]["render_bouncesDiffuse"])
 			self.render_bouncesGlossy.Value			= int(settings["settings"]["render_bouncesGlossy"])
@@ -67,6 +82,8 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 			self.render_Denoising.Checked			= bool(settings["settings"]["render_Denoising"])
 			self.save.Checked						= bool(settings["settings"]["save"])
 			self.showRender.Checked					= bool(settings["settings"]["showRender"])
+			
+			
 			
 			loc = settings["settings"]["render_settingWindowPosition"]
 			loc = loc.split(",")
@@ -81,7 +98,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		layout = forms.DynamicLayout()
 		layout.Spacing = drawing.Size(0, 1)
 		
-		"""Box 1"""
+		"""Box 1: Render"""
 		box_1 = forms.GroupBox()
 		box_1.Padding = drawing.Padding(1)
 		box_1_layout = forms.DynamicLayout()
@@ -91,39 +108,60 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		box_1_layout.AddRow("render_engine", self.render_engine)
 		box_1_layout.AddRow("render_scale", self.render_scale)
 		box_1_layout.AddRow("samples", self.render_samples)
-		box_1_layout.AddRow("HDRI", self.world_HDRI)
 		
-		"""Box 2"""
-		box_2 = forms.GroupBox(Text = 'Sampling')
+		
+		"""Box 2: Camera"""
+		box_2 = forms.GroupBox(Text = 'Camera')
 		box_2.Padding = drawing.Padding(1)
 		box_2_layout = forms.DynamicLayout()
 		box_2_layout.Spacing = drawing.Size(3, 3)
 		box_2.Content = box_2_layout
 		
-		box_2_layout.AddRow("bouncesTotal", self.render_bouncesTotal)
-		box_2_layout.AddRow("bouncesDiffuse", self.render_bouncesDiffuse)
-		box_2_layout.AddRow("bouncesGlossy", self.render_bouncesGlossy)
-		box_2_layout.AddRow("bouncesTransparency", self.render_bouncesTransparency)
-		box_2_layout.AddRow("bouncesTransmission", self.render_bouncesTransmission)
-		box_2_layout.AddRow("bouncesVolume", self.render_bouncesVolume)
-		box_2_layout.AddRow("clampingDirect", self.render_clampingDirect)
-		box_2_layout.AddRow("clampingIndirect", self.render_clampingIndirect)
+		box_2_layout.AddRow("Exposure", self.camera_exposure)
 		
-		"""Box 3"""
-		box_3 = forms.GroupBox(Text = 'Output')
+		"""Box 3: World"""
+		box_3 = forms.GroupBox(Text = 'World')
 		box_3.Padding = drawing.Padding(1)
 		box_3_layout = forms.DynamicLayout()
 		box_3_layout.Spacing = drawing.Size(3, 3)
 		box_3.Content = box_3_layout
 		
-		box_3_layout.AddRow("Denoising", self.render_Denoising)
-		box_3_layout.AddRow("Save File", self.save)
-		box_3_layout.AddRow("Show Render", self.showRender)
+		box_3_layout.AddRow("HDRI", self.world_HDRI)
+		box_3_layout.AddRow("HDRI Rotation", self.world_HDRIRotation)
+		
+		"""Box 4: Samples"""
+		box_4 = forms.GroupBox(Text = 'Sampling')
+		box_4.Padding = drawing.Padding(1)
+		box_4_layout = forms.DynamicLayout()
+		box_4_layout.Spacing = drawing.Size(3, 3)
+		box_4.Content = box_4_layout
+		
+		box_4_layout.AddRow("bouncesTotal", self.render_bouncesTotal)
+		box_4_layout.AddRow("bouncesDiffuse", self.render_bouncesDiffuse)
+		box_4_layout.AddRow("bouncesGlossy", self.render_bouncesGlossy)
+		box_4_layout.AddRow("bouncesTransparency", self.render_bouncesTransparency)
+		box_4_layout.AddRow("bouncesTransmission", self.render_bouncesTransmission)
+		box_4_layout.AddRow("bouncesVolume", self.render_bouncesVolume)
+		box_4_layout.AddRow("clampingDirect", self.render_clampingDirect)
+		box_4_layout.AddRow("clampingIndirect", self.render_clampingIndirect)
+		
+		"""Box 5: Output"""
+		box_5 = forms.GroupBox(Text = 'Output')
+		box_5.Padding = drawing.Padding(1)
+		box_5_layout = forms.DynamicLayout()
+		box_5_layout.Spacing = drawing.Size(3, 3)
+		box_5.Content = box_5_layout
+		
+		box_5_layout.AddRow("Denoising", self.render_Denoising)
+		box_5_layout.AddRow("Save File", self.save)
+		box_5_layout.AddRow("Show Render", self.showRender)
 		
 		#Add the group boxes to the main interface
 		layout.AddRow(box_1)
 		layout.AddRow(box_2)
 		layout.AddRow(box_3)
+		layout.AddRow(box_4)
+		layout.AddRow(box_5)
 		layout.AddSeparateRow(self.DefaultButton, None, self.AbortButton)
 
 		self.Content = layout
@@ -161,8 +199,7 @@ def RequestBlenderRenderSettingsDialog():
 		settings = {
 			"render_engine": 				["CYCLES", "EEVEE"][dialog.render_engine.SelectedIndex],
 			"render_scale": 				dialog.render_scale.Value,
-			"render_samples": 				dialog.render_samples.Value,
-			"world_HDRI" :					dialog.HDRIs[dialog.world_HDRI.SelectedIndex],
+			"render_samples": 				dialog.render_samples.Value,			
 			"render_bouncesTotal": 			dialog.render_bouncesTotal.Value,
 			"render_bouncesDiffuse": 		dialog.render_bouncesDiffuse.Value,
 			"render_bouncesGlossy": 		dialog.render_bouncesGlossy.Value,
@@ -176,8 +213,17 @@ def RequestBlenderRenderSettingsDialog():
 			"showRender":					dialog.showRender.Checked,
 			"render_settingWindowPosition": dialog.Location.ToString()
 			}
+			
+		camera = {
+			"camera_exposure": 				dialog.camera_exposure.Value
+		}
 		
-		new_entry = {"settings" : settings}
+		world = {
+			"world_HDRI" :					dialog.HDRIs[dialog.world_HDRI.SelectedIndex],
+			"world_HDRIRotation" :			dialog.world_HDRIRotation.Value
+		}
+		
+		new_entry = {"settings" : settings, "camera" : camera, "world" : world}
 		with open(json_filename, 'w') as f: json.dump(new_entry, f, indent = 4, sort_keys=True)
 		
 		return settings

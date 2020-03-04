@@ -69,6 +69,9 @@ def SetupScene():
         currentCameraObj.data.lens_unit = 'FOV'
         currentCameraObj.data.angle = float(d_camera["camera"]["camera_lensLength"])
 
+    #Exposure
+    scene.view_settings.exposure = float(d_settings["camera"]["camera_exposure"])
+
     #Clipping
     clippingNear = float(d_camera["camera"]["camera_clippingNear"])
     clippingFar = float(d_camera["camera"]["camera_clippingFar"])
@@ -103,14 +106,22 @@ def SetupScene():
         plane.scale = (100000,100000,100000)
 
     #Sky
-    if d_settings["settings"]["world_HDRI"] != "Colour":
-        hdri_filepath = filepath + "HDRI\\" + d_settings["settings"]["world_HDRI"]
+    if d_settings["world"]["world_HDRI"] != "Colour":
+        hdri_filepath = filepath + "HDRI\\" + d_settings["world"]["world_HDRI"]
         scene.world.use_nodes = True
         world = bpy.data.worlds["World"]
         nodes = world.node_tree.nodes
+
         env_node = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
         env_node.image = bpy.data.images.load(hdri_filepath)
         world.node_tree.links.new(env_node.outputs['Color'], world.node_tree.nodes['Background'].inputs['Color'])
+
+        map_node = world.node_tree.nodes.new('ShaderNodeMapping')
+        map_node.inputs[2].default_value[2] = math.radians(d_settings["world"]["world_HDRIRotation"])
+        world.node_tree.links.new(map_node.outputs['Vector'], env_node.inputs['Vector'])
+
+        text_node = world.node_tree.nodes.new('ShaderNodeTexCoord')
+        world.node_tree.links.new(text_node.outputs['Generated'], map_node.inputs['Vector'])
 
 
 def RenderSettings():

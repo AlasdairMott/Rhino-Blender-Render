@@ -225,13 +225,13 @@ class DisplayRenderETO(forms.Dialog[bool]):
 
 		self.image = None
 		if os.path.exists(image_path):
-			img = System.Drawing.Image.FromFile(image_path)
+			self.img = System.Drawing.Image.FromFile(image_path)
 		else:
 			return None
 
 		self.image = forms.ImageView()
-		self.image.Image = Rhino.UI.EtoExtensions.ToEto(img)
-		self.image.Size = drawing.Size(img.Width/2, img.Height/2)
+		self.image.Image = Rhino.UI.EtoExtensions.ToEto(self.img)
+		self.image.Size = drawing.Size(self.img.Width/2, self.img.Height/2)
 
 		self.DefaultButton = forms.Button(Text = 'Save')
 		self.DefaultButton.Click += self.OnOKButtonClick
@@ -247,6 +247,7 @@ class DisplayRenderETO(forms.Dialog[bool]):
 		self.Content = layout
 
 	def OnCloseButtonClick(self, sender, e):
+		self.img.Dispose()
 		self.Close(False)
 
 	def OnOKButtonClick(self, sender, e):

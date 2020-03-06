@@ -164,7 +164,9 @@ if d_settings and d_camera:
     Import()
     SetupScene()
     RenderSettings()
-    RenderScene(render_name)
+
+    if bool(d_settings["settings"]["render"]):
+        RenderScene(render_name)
 
     if bool(d_settings["settings"]["save"]):
         print ("Saving file")

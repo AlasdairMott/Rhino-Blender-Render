@@ -32,7 +32,7 @@ class BlenderRender:
 		if not doc_name: doc_name = "Render_"
 		else: doc_name = os.path.splitext(doc_name)[0]
 
-		self.render_name = doc_name + date.today().strftime("%y%m%d") + "_" + time.strftime("%Hh%Mm%Ss")
+		self.render_name = doc_name + "_" + date.today().strftime("%y%m%d") + "_" + time.strftime("%Hh%Mm%Ss")
 
 		#print "Filepath: " + self.filepath
 		#print "Rendername: " + self.render_name
@@ -191,30 +191,44 @@ class BlenderRender:
 		materials_file = open(self.script_path + self.render_name + ".mtl","w+")
 
 		materials_file.write("# Rhino" + "\n")
-
+		
 		for m_index in self.materials:
+			
 			material = sc.doc.Materials[m_index]
-
-			diffuse = [float(material.DiffuseColor.R), float(material.DiffuseColor.G), float(material.DiffuseColor.B)]
-			diffuse = [str('%.4f' % (i/255)) for i in diffuse]
-
-			emmission = [float(material.EmissionColor.R), float(material.EmissionColor.G), float(material.EmissionColor.B)]
-			emmission = [str('%.4f' % (i/255)) for i in emmission]
-
-			materials_file.write("newmtl " + material.Name + "\n")
-			materials_file.write("Ka 0.0000 0.0000 0.0000\n")
-			materials_file.write("Kd " + diffuse[0] + " " + diffuse[1] + " " + diffuse[2] + "\n")
-			materials_file.write("Ks 0.5000 0.5000 0.5000\n") #Specular Colour
-			#materials_file.write("Tf 0.0000 0.0000 0.0000\n")
-			materials_file.write("Ke " + emmission[0] + " " + emmission[1] + " " + emmission[2] + "\n")
-			#materials_file.write("Pr " + str('%.4f' % (material.Shine/255)) + "\n")
-			#materials_file.write("Pr " + str(material.ReflectionGlossiness) + "\n") #Gloss
-			#materials_file.write("Pr " + str(material.Reflectivity) + "\n") #Roughness
-			#materials_file.write("Pm " + str(material.Shine) + "\n")
-			materials_file.write("d 1.0000\n") #Transparency
-			materials_file.write("Ns "+ str('%.4f' % (material.Shine*(900/255))) + "\n")
-			#materials_file.write("Ns 0.5000\n") #Specular amount
-
+			materials_file.write("\n")
+			materials_file.write("newmtl " + material.Name + "\n")												#Material Name
+			materials_file.write("Ns "+ str('%.4f' % (material.Shine*(900/255))) + "\n")						#Glossiness
+			materials_file.write("Ka 1.0000 1.0000 1.0000\n")
+			
+			
+			if material.Reflectivity == 0: #Dialectric Material (Diffuse)
+			
+				diffuse = [float(material.DiffuseColor.R), float(material.DiffuseColor.G), float(material.DiffuseColor.B)]
+				diffuse = [str('%.4f' % (i/255)) for i in diffuse]
+	
+				emmission = [float(material.EmissionColor.R), float(material.EmissionColor.G), float(material.EmissionColor.B)]
+				emmission = [str('%.4f' % (i/255)) for i in emmission]
+				
+				materials_file.write("Kd " + diffuse[0] + " " + diffuse[1] + " " + diffuse[2] + "\n")			#Diffuse Colour
+				materials_file.write("Ks 0.5000 0.5000 0.5000\n") 												#Specular (White, 0.5)
+				materials_file.write("Ke " + emmission[0] + " " + emmission[1] + " " + emmission[2] + "\n") 	#Emission
+				materials_file.write("illum 2\n")
+				
+			else: #Metallic Material
+				
+				refColor = [float(material.ReflectionColor.R), float(material.ReflectionColor.G), float(material.ReflectionColor.B)]
+				refColor = [str('%.4f' % (i/255)) for i in refColor]
+				
+				materials_file.write("Kd " + refColor[0] + " " + refColor[1] + " " + refColor[2] + "\n")		#Reflection Colour
+				materials_file.write("Ks 0.5000 0.5000 0.5000\n") 												#Specular (White, 0.5)
+				materials_file.write("Ke 0.0000 0.0000 0.0000\n") 												#Emission
+				#materials_file.write("Pm 1.0000" + "\n")														#Material is Metallic
+				materials_file.write("illum 3\n")
+				#Material.ReflectionGlossiness: 0.67104613781
+			
+			materials_file.write("Ni 1.4500" + "\n")															#IOR
+			materials_file.write("d 1.0000\n") 																	#Transparency
+			
 		materials_file.close()
 
 class DisplayRenderETO(forms.Dialog[bool]):
@@ -277,7 +291,7 @@ def run():
 	render_instance.ExportMaterials()
 	render_instance.Render()
 
-	if settings["showRender"] == True:
+	if settings["render"] == True and settings["showRender"] == True:
 		DisplayRender(render_instance.filepath + render_instance.render_name + '.png')
 
 run()

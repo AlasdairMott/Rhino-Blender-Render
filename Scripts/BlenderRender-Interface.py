@@ -1,9 +1,12 @@
+# -*- encoding: utf-8 -*-
+
 import Rhino
 import scriptcontext
 import System
 import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
+from System import Drawing as dw
 
 import os
 import json
@@ -58,7 +61,9 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		self.render_clampingIndirect.DecimalPlaces = 2
 		self.render_clampingIndirect.MinValue = 0.00
 		self.render_Denoising = forms.CheckBox()
+		
 		self.save = forms.CheckBox()
+		self.render = forms.CheckBox()
 		self.showRender = forms.CheckBox()
 
 		if settings:
@@ -80,10 +85,10 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 			self.render_clampingDirect.Value		= float(settings["settings"]["render_clampingDirect"])
 			self.render_clampingIndirect.Value		= float(settings["settings"]["render_clampingIndirect"])
 			self.render_Denoising.Checked			= bool(settings["settings"]["render_Denoising"])
+			
 			self.save.Checked						= bool(settings["settings"]["save"])
+			self.render.Checked						= bool(settings["settings"]["render"])
 			self.showRender.Checked					= bool(settings["settings"]["showRender"])
-			
-			
 			
 			loc = settings["settings"]["render_settingWindowPosition"]
 			loc = loc.split(",")
@@ -136,14 +141,26 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		box_4_layout.Spacing = drawing.Size(3, 3)
 		box_4.Content = box_4_layout
 		
-		box_4_layout.AddRow("bouncesTotal", self.render_bouncesTotal)
-		box_4_layout.AddRow("bouncesDiffuse", self.render_bouncesDiffuse)
-		box_4_layout.AddRow("bouncesGlossy", self.render_bouncesGlossy)
-		box_4_layout.AddRow("bouncesTransparency", self.render_bouncesTransparency)
-		box_4_layout.AddRow("bouncesTransmission", self.render_bouncesTransmission)
-		box_4_layout.AddRow("bouncesVolume", self.render_bouncesVolume)
-		box_4_layout.AddRow("clampingDirect", self.render_clampingDirect)
-		box_4_layout.AddRow("clampingIndirect", self.render_clampingIndirect)
+		self.box_4_hidden = forms.DynamicLayout(Visible = False)
+		self.box_4_hidden.Spacing = drawing.Size(3, 3)
+		
+		self.box_4_hidden.AddRow("bouncesTotal", self.render_bouncesTotal)
+		self.box_4_hidden.AddRow("bouncesDiffuse", self.render_bouncesDiffuse)
+		self.box_4_hidden.AddRow("bouncesGlossy", self.render_bouncesGlossy)
+		self.box_4_hidden.AddRow("bouncesTransparency", self.render_bouncesTransparency)
+		self.box_4_hidden.AddRow("bouncesTransmission", self.render_bouncesTransmission)
+		self.box_4_hidden.AddRow("bouncesVolume", self.render_bouncesVolume)
+		self.box_4_hidden.AddRow("clampingDirect", self.render_clampingDirect)
+		self.box_4_hidden.AddRow("clampingIndirect", self.render_clampingIndirect)
+		
+		self.dropdown_text = forms.Label(Text = "Show Sampling Properties")
+		self.dropdown_samples = forms.Button(Size = drawing.Size(16,16))
+		self.dropdown_samples.Text = "▼"
+		self.dropdown_samples.Font = drawing.Font("Arial", 5)
+		self.dropdown_samples.Click += self.dropdown_samples_Click
+		
+		box_4_layout.AddSeparateRow(None, self.dropdown_text, None, self.dropdown_samples, None)
+		box_4_layout.AddRow(self.box_4_hidden)
 		
 		"""Box 5: Output"""
 		box_5 = forms.GroupBox(Text = 'Output')
@@ -154,6 +171,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		
 		box_5_layout.AddRow("Denoising", self.render_Denoising)
 		box_5_layout.AddRow("Save File", self.save)
+		box_5_layout.AddRow("Render", self.render)
 		box_5_layout.AddRow("Show Render", self.showRender)
 		
 		#Add the group boxes to the main interface
@@ -174,7 +192,20 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		if os.path.exists(json_filename):
 			with open(json_filename) as f: return json.load(f)
 		else: return None
-	
+
+	def dropdown_samples_Click(self, sender, e):
+		if self.box_4_hidden.Visible:
+			self.ClientSize = drawing.Size(self.ClientSize.Width, 406)
+			self.box_4_hidden.Visible = False
+			#self.dropdown_text.Visible = True
+			self.dropdown_samples.Text = "▼"
+		else:
+			self.box_4_hidden.Visible = True
+			#self.dropdown_text.Visible = False
+			self.dropdown_samples.Text = "▲"
+			#self.ClientSize = drawing.Size(max(self.ClientSize.Width, self.box_4_hidden.Width), self.ClientSize.Height + self.box_4_hidden.Height*2)
+			self.ClientSize = drawing.Size(self.ClientSize.Width, 406 + 181)
+
 	def OnCloseButtonClick(self, sender, e):
 		self.Close(False)
 
@@ -210,6 +241,7 @@ def RequestBlenderRenderSettingsDialog():
 			"render_clampingIndirect": 		dialog.render_clampingIndirect.Value,
 			"render_Denoising": 			dialog.render_Denoising.Checked,
 			"save": 						dialog.save.Checked,
+			"render":						dialog.render.Checked,
 			"showRender":					dialog.showRender.Checked,
 			"render_settingWindowPosition": dialog.Location.ToString()
 			}

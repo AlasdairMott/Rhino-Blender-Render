@@ -1,22 +1,22 @@
 {
     "camera": {
-        "camera_clippingFar": 2812.5308915572255, 
-        "camera_clippingNear": 1.3922027913208397, 
+        "camera_clippingFar": 2657.9875648793659, 
+        "camera_clippingNear": 1.3157038446152924, 
         "camera_height": 853, 
-        "camera_lensLength": 1.3125109300542372, 
+        "camera_lensLength": 0.73372361467954017, 
         "camera_lensType": "Perspective", 
-        "camera_location": "-358.320343920916,52.9087201022437,30.0643166304812", 
-        "camera_rotation": "1.6448184312631422, 1.3010426069826053e-16, -1.486574119286308", 
-        "camera_width": 1916
+        "camera_location": "-143.670287385308,-238.315187923191,30.5694722831544", 
+        "camera_rotation": "1.5869469876443822, 2.4416232924373565e-16, -1.4226399530027256", 
+        "camera_width": 956
     }, 
-    "object": "RhinoRender200304_12h15m17s.obj", 
+    "object": "RhinoRender_200305_13h54m30s.obj", 
     "savepath": "C:\\Users\\Alasdair\\Desktop\\\\", 
     "world": {
         "ambientocclusion_enabled": false, 
         "ambientocclusion_factor": 1.0, 
         "groundplane_enabled": false, 
         "groundplane_height": -111.0025, 
-        "sun_enabled": false, 
-        "sun_vector": "0.770698456311231,0.10753649125081,-0.628060341439379"
+        "sun_enabled": true, 
+        "sun_vector": "0.767252800999258,0.59674783447699,0.234979065888466"
     }
 }

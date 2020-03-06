@@ -1,8 +1,9 @@
 {
     "camera": {
-        "camera_exposure": -1.0
+        "camera_exposure": 0.0
     }, 
     "settings": {
+        "render": true, 
         "render_Denoising": true, 
         "render_bouncesDiffuse": 2.0, 
         "render_bouncesGlossy": 2.0, 
@@ -15,12 +16,12 @@
         "render_engine": "CYCLES", 
         "render_samples": 256.0, 
         "render_scale": 100.0, 
-        "render_settingWindowPosition": "841,227", 
+        "render_settingWindowPosition": "535,268", 
         "save": false, 
         "showRender": true
     }, 
     "world": {
-        "world_HDRI": "sunny_03.hdr", 
-        "world_HDRIRotation": 120.0
+        "world_HDRI": "Colour", 
+        "world_HDRIRotation": 0.0
     }
 }

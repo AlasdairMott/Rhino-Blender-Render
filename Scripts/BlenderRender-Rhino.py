@@ -26,7 +26,7 @@ class BlenderRender:
 
 		filepath = rs.DocumentPath()
 		if not filepath: self.filepath = self.script_path
-		else: self.filepath = str(os.path.splitext(str(filepath))[0]) + "\\"
+		else: self.filepath = str(os.path.splitext(str(filepath))[0])
 
 		doc_name = rs.DocumentName()
 		if not doc_name: doc_name = "Render_"
@@ -110,7 +110,11 @@ class BlenderRender:
 				#attr.CommitChanges()
 			elif material_index not in self.materials:
 				self.materials.append(material_index)
-
+			
+			if rs.IsMesh(o): 
+				ml_doc.append(sc.doc.Objects.AddMesh(o.MeshGeometry, attr))
+				continue
+			
 			p = o.GetRenderMeshParameters()
 			obrefs = Rhino.DocObjects.RhinoObject.GetRenderMeshes([o], True, True)
 			mainmesh = Rhino.Geometry.Mesh()
@@ -146,16 +150,21 @@ class BlenderRender:
 
 		rs.EnableRedraw(True)
 
-	def Render(self):
+	def ExportRender(self, bool_open, bool_show):
 		python_script = self.script_path + "BlenderRender-Blender.py"
-
-		args = ["C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe",
-				"--background", "--python", python_script, "--", self.render_name]
-		try:
-			subprocess.call(args)
-		except subprocess.CalledProcessError:
-			print ("Render Failed")
-
+		
+		if bool_open:
+			if bool_show: 	arg = '"C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" --python ' 				+ python_script
+			else: 			arg = '"C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" --background --python ' 	+ python_script
+			os.popen(arg)
+		else:
+			args = ["C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe",
+					"--background", "--python", python_script, "--", self.render_name]
+			try:
+				subprocess.call(args)
+			except subprocess.CalledProcessError:
+				print ("Render Failed")
+	
 	def WriteJson(self):
 		json_filename = self.script_path + "BlenderRender-Camera.json"
 
@@ -183,7 +192,7 @@ class BlenderRender:
 				"ambientocclusion_factor" : sc.doc.Lights.Skylight.ShadowIntensity
 				}
 
-		new_entry = {"savepath" : self.filepath, "object": self.render_name + ".obj", "camera" : camera, "world" : world}
+		new_entry = {"rendername" : self.render_name , "savepath" : self.filepath, "object": self.render_name + ".obj", "camera" : camera, "world" : world}
 
 		with open(json_filename, 'w') as f: json.dump(new_entry, f, indent = 4, sort_keys=True)
 
@@ -289,9 +298,9 @@ def run():
 	render_instance.WriteJson()
 	render_instance.ExportObj()
 	render_instance.ExportMaterials()
-	render_instance.Render()
+	render_instance.ExportRender(settings["open"], settings["showRender"])
 
-	if settings["render"] == True and settings["showRender"] == True:
+	if settings["render"] == True and settings["showRender"] == True and not settings["open"]:
 		DisplayRender(render_instance.filepath + render_instance.render_name + '.png')
 
 run()

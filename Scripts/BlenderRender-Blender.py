@@ -6,8 +6,11 @@ import sys
 import json
 from mathutils import Vector
 
-argv = sys.argv
-render_name = argv[argv.index("--") + 1:][0]
+#argv = sys.argv
+#render_name = argv[argv.index("--") + 1:][0]
+
+#Hide Splash Screen on Startup
+bpy.context.preferences.view.show_splash = False
 
 scene = bpy.context.scene
 
@@ -68,6 +71,10 @@ def SetupScene():
         #scene_camera.data.lens = float(d_camera["camera"]["camera_lensLength"])
         currentCameraObj.data.lens_unit = 'FOV'
         currentCameraObj.data.angle = float(d_camera["camera"]["camera_lensLength"])
+
+    #Align View to Main Camera
+    area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
+    area.spaces[0].region_3d.view_perspective = 'CAMERA'
 
     #Exposure
     scene.view_settings.exposure = float(d_settings["camera"]["camera_exposure"])
@@ -158,6 +165,8 @@ def RenderScene(r_name):
 
 d_settings = ReadData("BlenderRender-Settings.json")
 d_camera = ReadData("BlenderRender-Camera.json")
+
+render_name = d_camera["rendername"]
 
 if d_settings and d_camera:
     ClearAll()

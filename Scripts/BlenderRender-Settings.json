@@ -1,8 +1,9 @@
 {
     "camera": {
-        "camera_exposure": 0.0
+        "camera_exposure": -0.20000000000000001
     }, 
     "settings": {
+        "open": true, 
         "render": true, 
         "render_Denoising": true, 
         "render_bouncesDiffuse": 2.0, 
@@ -14,14 +15,14 @@
         "render_clampingDirect": 0.050000000000000003, 
         "render_clampingIndirect": 10.0, 
         "render_engine": "CYCLES", 
-        "render_samples": 256.0, 
-        "render_scale": 100.0, 
-        "render_settingWindowPosition": "535,268", 
+        "render_samples": 32.0, 
+        "render_scale": 20.0, 
+        "render_settingWindowPosition": "224,200", 
         "save": false, 
         "showRender": true
     }, 
     "world": {
-        "world_HDRI": "Colour", 
+        "world_HDRI": "sunny_02.hdr", 
         "world_HDRIRotation": 0.0
     }
 }

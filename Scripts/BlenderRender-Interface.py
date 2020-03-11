@@ -62,6 +62,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		self.render_clampingIndirect.MinValue = 0.00
 		self.render_Denoising = forms.CheckBox()
 		
+		self.open = forms.CheckBox()
 		self.save = forms.CheckBox()
 		self.render = forms.CheckBox()
 		self.showRender = forms.CheckBox()
@@ -86,6 +87,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 			self.render_clampingIndirect.Value		= float(settings["settings"]["render_clampingIndirect"])
 			self.render_Denoising.Checked			= bool(settings["settings"]["render_Denoising"])
 			
+			self.open.Checked						= bool(settings["settings"]["open"])
 			self.save.Checked						= bool(settings["settings"]["save"])
 			self.render.Checked						= bool(settings["settings"]["render"])
 			self.showRender.Checked					= bool(settings["settings"]["showRender"])
@@ -169,10 +171,10 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		box_5_layout.Spacing = drawing.Size(3, 3)
 		box_5.Content = box_5_layout
 		
-		box_5_layout.AddRow("Denoising", self.render_Denoising)
-		box_5_layout.AddRow("Save File", self.save)
-		box_5_layout.AddRow("Render", self.render)
-		box_5_layout.AddRow("Show Render", self.showRender)
+		box_5_layout.AddRow(self.save, "Save File", self.open, "Open File")
+		box_5_layout.AddRow(self.render_Denoising, "Denoising")
+		box_5_layout.AddRow(self.render, "Render")
+		box_5_layout.AddRow(self.showRender, "Show Render")
 		
 		#Add the group boxes to the main interface
 		layout.AddRow(box_1)
@@ -240,6 +242,7 @@ def RequestBlenderRenderSettingsDialog():
 			"render_clampingDirect": 		dialog.render_clampingDirect.Value,
 			"render_clampingIndirect": 		dialog.render_clampingIndirect.Value,
 			"render_Denoising": 			dialog.render_Denoising.Checked,
+			"open":							dialog.open.Checked,
 			"save": 						dialog.save.Checked,
 			"render":						dialog.render.Checked,
 			"showRender":					dialog.showRender.Checked,

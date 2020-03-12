@@ -41,11 +41,21 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		self.camera_exposure.Increment = 0.1
 		self.camera_exposure.MinValue = -10.000
 		self.camera_exposure.MaxValue = 10.000
+		self.camera_transparent = forms.CheckBox()
 		
 		self.world_HDRI = forms.ComboBox()
 		self.world_HDRI.DataStore = self.HDRIs
 		self.world_HDRIRotation = forms.NumericStepper()
 		self.world_HDRIRotation.DecimalPlaces = 2
+		self.world_HDRIBlur = forms.NumericStepper()
+		self.world_HDRIBlur.DecimalPlaces = 2
+		self.world_HDRIBlur.MinValue = 0.000
+		self.world_HDRIBlur.MaxValue = 1.000
+		self.world_HDRIBlur.Width = 50
+		self.world_HDRIPower = forms.NumericStepper()
+		self.world_HDRIPower.DecimalPlaces = 2
+		self.world_HDRIPower.MinValue = 0.000
+		self.world_HDRIPower.Width = 50
 		
 		self.render_bouncesTotal = forms.NumericStepper()
 		self.render_bouncesDiffuse = forms.NumericStepper()
@@ -73,9 +83,12 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 			self.render_samples.Value				= int(settings["settings"]["render_samples"])
 			
 			self.camera_exposure.Value				= float(settings["camera"]["camera_exposure"])
+			self.camera_transparent.Checked			= bool(settings["camera"]["camera_transparent"])
 			
 			self.world_HDRI.SelectedIndex			= self.world_HDRI.DataStore.index(settings["world"]["world_HDRI"])
 			self.world_HDRIRotation.Value			= float(settings["world"]["world_HDRIRotation"])
+			self.world_HDRIBlur.Value				= float(settings["world"]["world_HDRIBlur"])
+			self.world_HDRIPower.Value				= float(settings["world"]["world_HDRIPower"])
 			
 			self.render_bouncesTotal.Value			= int(settings["settings"]["render_bouncesTotal"])
 			self.render_bouncesDiffuse.Value		= int(settings["settings"]["render_bouncesDiffuse"])
@@ -125,6 +138,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		box_2.Content = box_2_layout
 		
 		box_2_layout.AddRow("Exposure", self.camera_exposure)
+		box_2_layout.AddRow("Transparent", self.camera_transparent)
 		
 		"""Box 3: World"""
 		box_3 = forms.GroupBox(Text = 'World')
@@ -133,8 +147,11 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		box_3_layout.Spacing = drawing.Size(3, 3)
 		box_3.Content = box_3_layout
 		
+		box_3_layout.BeginVertical()
 		box_3_layout.AddRow("HDRI", self.world_HDRI)
 		box_3_layout.AddRow("HDRI Rotation", self.world_HDRIRotation)
+		box_3_layout.EndVertical()
+		box_3_layout.AddSeparateRow("Blur", self.world_HDRIBlur, None, "Power", self.world_HDRIPower)
 		
 		"""Box 4: Samples"""
 		box_4 = forms.GroupBox(Text = 'Sampling')
@@ -183,7 +200,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 		layout.AddRow(box_4)
 		layout.AddRow(box_5)
 		layout.AddSeparateRow(self.DefaultButton, None, self.AbortButton)
-
+		
 		self.Content = layout
 
 	def readSettings(self):
@@ -197,7 +214,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 
 	def dropdown_samples_Click(self, sender, e):
 		if self.box_4_hidden.Visible:
-			self.ClientSize = drawing.Size(self.ClientSize.Width, 406)
+			self.ClientSize = drawing.Size(self.ClientSize.Width, 440)
 			self.box_4_hidden.Visible = False
 			#self.dropdown_text.Visible = True
 			self.dropdown_samples.Text = "▼"
@@ -206,7 +223,7 @@ class BlenderRenderSettingsDialog(forms.Dialog[bool]):
 			#self.dropdown_text.Visible = False
 			self.dropdown_samples.Text = "▲"
 			#self.ClientSize = drawing.Size(max(self.ClientSize.Width, self.box_4_hidden.Width), self.ClientSize.Height + self.box_4_hidden.Height*2)
-			self.ClientSize = drawing.Size(self.ClientSize.Width, 406 + 181)
+			self.ClientSize = drawing.Size(self.ClientSize.Width, 440 + 181)
 
 	def OnCloseButtonClick(self, sender, e):
 		self.Close(False)
@@ -250,12 +267,15 @@ def RequestBlenderRenderSettingsDialog():
 			}
 			
 		camera = {
-			"camera_exposure": 				dialog.camera_exposure.Value
+			"camera_exposure": 				dialog.camera_exposure.Value,
+			"camera_transparent":			dialog.camera_transparent.Checked
 		}
 		
 		world = {
 			"world_HDRI" :					dialog.HDRIs[dialog.world_HDRI.SelectedIndex],
-			"world_HDRIRotation" :			dialog.world_HDRIRotation.Value
+			"world_HDRIRotation" :			dialog.world_HDRIRotation.Value,
+			"world_HDRIBlur" :				dialog.world_HDRIBlur.Value,
+			"world_HDRIPower" :				dialog.world_HDRIPower.Value
 		}
 		
 		new_entry = {"settings" : settings, "camera" : camera, "world" : world}

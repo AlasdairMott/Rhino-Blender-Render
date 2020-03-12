@@ -6,9 +6,6 @@ import sys
 import json
 from mathutils import Vector
 
-#argv = sys.argv
-#render_name = argv[argv.index("--") + 1:][0]
-
 #Hide Splash Screen on Startup
 bpy.context.preferences.view.show_splash = False
 
@@ -24,7 +21,6 @@ def ReadData(filename):
             return datastore
     except IOError:
         print ("Reading Failed")
-
 
 def ClearAll():
     #Remove all objects
@@ -79,6 +75,9 @@ def SetupScene():
     #Exposure
     scene.view_settings.exposure = float(d_settings["camera"]["camera_exposure"])
 
+    #Transparency
+    if bool(d_settings["camera"]["camera_transparent"]): scene.render.film_transparent = True
+
     #Clipping
     clippingNear = float(d_camera["camera"]["camera_clippingNear"])
     clippingFar = float(d_camera["camera"]["camera_clippingFar"])
@@ -118,18 +117,45 @@ def SetupScene():
         scene.world.use_nodes = True
         world = bpy.data.worlds["World"]
         nodes = world.node_tree.nodes
+        links = world.node_tree.links
+
+        world_HDRIPower =  float(d_settings["world"]["world_HDRIPower"])
+        bg_node = world.node_tree.nodes['Background']
+        bg_node.inputs[1].default_value = world_HDRIPower
 
         env_node = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
         env_node.image = bpy.data.images.load(hdri_filepath)
-        world.node_tree.links.new(env_node.outputs['Color'], world.node_tree.nodes['Background'].inputs['Color'])
+        env_node.location = (bg_node.location.x -300 ,bg_node.location.y)
+        links.new(env_node.outputs['Color'], bg_node.inputs['Color'])
 
+        world_rotation = float(d_settings["world"]["world_HDRIRotation"])
         map_node = world.node_tree.nodes.new('ShaderNodeMapping')
-        map_node.inputs[2].default_value[2] = math.radians(d_settings["world"]["world_HDRIRotation"])
-        world.node_tree.links.new(map_node.outputs['Vector'], env_node.inputs['Vector'])
+        map_node.inputs[2].default_value[2] = math.radians(world_rotation)
+        map_node.location = (env_node.location.x -200 ,env_node.location.y)
+        links.new(map_node.outputs['Vector'], env_node.inputs['Vector'])
+
+        world_HDRIBlur = float(d_settings["world"]["world_HDRIBlur"])
+        add_node = world.node_tree.nodes.new('ShaderNodeMixRGB')
+        add_node.blend_type = "ADD"
+        add_node.inputs[0].default_value = world_HDRIBlur
+        add_node.location = (map_node.location.x -200 ,map_node.location.y)
+        links.new(add_node.outputs['Color'], map_node.inputs['Vector'])
+
+        subtract_node = world.node_tree.nodes.new('ShaderNodeMixRGB')
+        subtract_node.blend_type = "SUBTRACT"
+        subtract_node.inputs[0].default_value = 1.0
+        subtract_node.location = (add_node.location.x -200 ,add_node.location.y - 200)
+        links.new(subtract_node.outputs['Color'], add_node.inputs['Color2'])
+
+        noise_node = world.node_tree.nodes.new('ShaderNodeTexNoise')
+        noise_node.inputs[2].default_value = 10000
+        noise_node.location = (subtract_node.location.x -200 ,subtract_node.location.y)
+        links.new(noise_node.outputs['Color'], subtract_node.inputs['Color2'])
 
         text_node = world.node_tree.nodes.new('ShaderNodeTexCoord')
-        world.node_tree.links.new(text_node.outputs['Generated'], map_node.inputs['Vector'])
-
+        text_node.location = (noise_node.location.x -200 ,noise_node.location.y + 200)
+        links.new(text_node.outputs['Generated'], add_node.inputs['Color1'])
+        links.new(text_node.outputs['Generated'], noise_node.inputs['Vector'])
 
 def RenderSettings():
     bpy.context.scene.render.resolution_percentage          = float(d_settings["settings"]["render_scale"])

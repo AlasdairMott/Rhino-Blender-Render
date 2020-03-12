@@ -154,8 +154,9 @@ class BlenderRender:
 		python_script = self.script_path + "BlenderRender-Blender.py"
 		
 		if bool_open:
-			if bool_show: 	arg = '"C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" --python ' 				+ python_script
-			else: 			arg = '"C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" --background --python ' 	+ python_script
+			#if bool_show: 	arg = '"C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" --python ' 				+ python_script
+			#else: 			arg = '"C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" --background --python ' 	+ python_script
+			arg = '"C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" --python ' + python_script
 			os.popen(arg)
 		else:
 			args = ["C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe",

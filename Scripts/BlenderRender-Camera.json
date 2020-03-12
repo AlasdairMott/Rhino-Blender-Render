@@ -1,16 +1,16 @@
 {
     "camera": {
-        "camera_clippingFar": 9545.1483826906424, 
-        "camera_clippingNear": 4.7248484494318737, 
+        "camera_clippingFar": 9549.9756552632261, 
+        "camera_clippingNear": 4.7272379493553167, 
         "camera_height": 853, 
-        "camera_lensLength": 0.98885003690240414, 
+        "camera_lensLength": 0.98885003690240481, 
         "camera_lensType": "Perspective", 
         "camera_location": "464.135287249542,-331.399179394749,17.220682090112", 
         "camera_rotation": "1.5812651268512739, -3.5561831257524545e-17, 0.82203737570396118", 
         "camera_width": 1916
     }, 
-    "object": "RhinoCrashDump_200312_09h44m00s.obj", 
-    "rendername": "RhinoCrashDump_200312_09h44m00s", 
+    "object": "RhinoCrashDump_200312_11h21m23s.obj", 
+    "rendername": "RhinoCrashDump_200312_11h21m23s", 
     "savepath": "C:\\Users\\Alasdair\\Desktop\\2003\\", 
     "world": {
         "ambientocclusion_enabled": true, 
